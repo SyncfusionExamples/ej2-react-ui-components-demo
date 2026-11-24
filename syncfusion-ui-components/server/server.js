@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const jwt = require('jsonwebtoken');
+
+const fs = require('node:fs');
+const path = require('node:path');
+
 const { ORDERS } = require('./data');
 const { queryOrders, distinctValues, invalidateQueryCaches } = require('./query');
 const schedule = require('./schedule');
@@ -155,6 +159,19 @@ app.post('/api/schedule/reset', authenticate, (req, res) => {
 });
 
 app.get('/api/health', (req, res) => res.json({ ok: true, records: ORDERS.length }));
+
+const staticDirectory = path.resolve(__dirname, '../public');
+const indexFile = path.join(staticDirectory, 'index.html');
+if (fs.existsSync(indexFile)) {
+  app.use('/ej2-ui-components', express.static(staticDirectory));
+  app.use(express.static(staticDirectory));
+  app.get(/.*/, (req, res) => {
+    if (req.path === '/api' || req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+    return res.sendFile(indexFile);
+  });
+}
 
 app.listen(PORT, () => {
   buildPivotData();
