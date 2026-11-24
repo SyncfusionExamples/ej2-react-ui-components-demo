@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { registerLicense } from '@syncfusion/ej2-base';
 import { AuthProvider } from './auth/AuthContext';
+import { getPublicBasePath } from '../src/basePath';
 import App from './App';
 import './index.css';
 
@@ -12,7 +13,7 @@ if (licenseKey) registerLicense(licenseKey);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={getPublicBasePath()}>
       <AuthProvider>
         <App />
       </AuthProvider>

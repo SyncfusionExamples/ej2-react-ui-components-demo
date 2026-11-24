@@ -28,6 +28,7 @@ function stripRemoteFontImports(): Plugin {
 
 // API calls to /api are proxied to the Express mock server (server/ folder).
 export default defineConfig({
+  base: '/ej2-ui-components/',
   plugins: [stripRemoteFontImports(), react()],
   server: {
     port: 5173,
@@ -37,5 +38,5 @@ export default defineConfig({
     port: 4173,
     proxy: { '/api': { target: 'http://localhost:5000', changeOrigin: true } },
   },
-  build: { chunkSizeWarningLimit: 2500 },
+  build: { outDir: 'dist/public', chunkSizeWarningLimit: 2500 },
 })
