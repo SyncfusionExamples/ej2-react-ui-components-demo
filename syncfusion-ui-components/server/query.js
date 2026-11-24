@@ -145,16 +145,18 @@ function queryOrders({ skip = 0, take = 50, sorted, where }) {
 
 // Distinct values for the Excel/checkbox filter popup. Returns one full record per
 // distinct value (the grid re-applies the other columns' filters on this list).
-function distinctValues({ field, where, take = 1000 }) {
+function distinctValues({ field, where, take = 1000, skip = 0 }) {
   const { view } = getView(where, null);
   const seen = new Set();
-  const out = [];
-  for (let i = 0; i < view.length && out.length < take; i++) {
+  const distinct = [];
+  for (let i = 0; i < view.length; i++) {
     const row = ORDERS[view[i]];
     const v = row[field];
-    if (!seen.has(v)) { seen.add(v); out.push(row); }
+    if (!seen.has(v)) { seen.add(v); distinct.push(row); }
   }
-  return out;
+  const s = Math.max(0, Number(skip) || 0);
+  const t = Math.min(1000, Math.max(1, Number(take) || 1000));
+  return { result: distinct.slice(s, s + t), count: distinct.length };
 }
 
 module.exports = { queryOrders, distinctValues };

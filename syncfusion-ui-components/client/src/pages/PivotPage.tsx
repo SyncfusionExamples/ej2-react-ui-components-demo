@@ -1,8 +1,6 @@
-import '@syncfusion/ej2-tailwind3-theme/styles/pivotview/index-lite.css';
-import '@syncfusion/ej2-tailwind3-theme/styles/pivotfieldlist/index-lite.css';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  FieldList, GroupingBar, Inject, PivotViewComponent, VirtualScroll,
+  FieldList, GroupingBar, Inject, Pager, PivotViewComponent, VirtualScroll,
 } from '@syncfusion/ej2-react-pivotview';
 import type { DataSourceSettingsModel } from '@syncfusion/ej2-pivotview/src/model/datasourcesettings-model';
 import PageHeader from '../components/PageHeader';
@@ -30,7 +28,7 @@ export default function PivotPage() {
 
   const dataSourceSettings = useMemo<DataSourceSettingsModel | null>(() => rows && {
     dataSource: rows as unknown as DataSourceSettingsModel['dataSource'],
-    expandAll: false,
+    expandAll: true,
     enableSorting: true,
     rows: [{ name: 'Region' }, { name: 'Category' }, { name: 'Product' }],
     columns: [{ name: 'Year' }, { name: 'Quarter' }],
@@ -61,16 +59,20 @@ export default function PivotPage() {
         ) : (
           <PivotViewComponent
             id="scm-pivot"
-            height={Math.max(400, window.innerHeight - 290)}
+            height={450}
             width="100%"
             dataSourceSettings={dataSourceSettings}
-            enableVirtualization
             showFieldList
             showGroupingBar
+            enablePaging={true}
+            pageSettings={{
+              rowPageSize: 10,
+              
+          }} 
             allowDeferLayoutUpdate
             gridSettings={{ columnWidth: 150 }}
           >
-            <Inject services={[FieldList, GroupingBar, VirtualScroll]} />
+            <Inject services={[FieldList, GroupingBar, VirtualScroll, Pager]} />
           </PivotViewComponent>
         )}
       </div>

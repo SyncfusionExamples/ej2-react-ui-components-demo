@@ -40,6 +40,6 @@ export const MODULES: AppModule[] = [
   { key: 'heatmap', path: '/heatmap', title: 'Heat Map', tag: 'Service level', color: '#dc2626', description: 'On-time delivery % by lane and week across the transport network.' },
   { key: 'sankey', path: '/sankey', title: 'Sankey', tag: 'Flow', color: '#2563eb', description: 'Supplier to plant to DC to channel business flows.' },
   { key: 'gantt', path: '/gantt', title: 'Gantt', tag: 'Planning', color: '#ea580c', description: 'Warehouse rollout plan with task dependencies and progress.' },
-  { key: 'schedule', path: '/schedule', title: 'Schedule', tag: 'Calendar', color: '#16a34a', description: 'Inbound and outbound shipment calendar for the distribution centres.' },
+  { key: 'schedule', path: '/schedule', title: 'Schedule', tag: 'Live planning', color: '#16a34a', description: 'Delivery plan for the same 1L SCM orders by warehouse. Drag an order to reschedule it.' },
   { key: 'diagram', path: '/diagram', title: 'Diagram', tag: 'Flow', color: '#db2777', description: 'End-to-end supply chain flow from supplier to customer.' },
 ];

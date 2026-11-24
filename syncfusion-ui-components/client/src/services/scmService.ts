@@ -56,12 +56,13 @@ export async function getOrders(state: DataStateChangeEventArgs, signal?: AbortS
 }
 
 /** Distinct values for the Excel-like filter checkbox list. */
-export async function getDistinct(field: string, where: unknown, take = 1000): Promise<ScmOrder[]> {
-  const rows = await apiFetch<ScmOrder[]>('/orders/distinct', {
+export async function getDistinct(field: string, where: unknown, take = 1000, skip = 0): Promise<{ result: ScmOrder[]; count: number }> {
+  const res = await apiFetch<{ result: ScmOrder[]; count: number }>('/orders/distinct', {
     method: 'POST',
-    body: JSON.stringify({ field, where: where ?? [], take }),
+    body: JSON.stringify({ field, where: where ?? [], take, skip }),
   });
-  return reviveDates(rows);
+  reviveDates(res.result);
+  return res;
 }
 
 export const getPivotData = () =>

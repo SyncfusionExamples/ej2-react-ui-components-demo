@@ -44,7 +44,6 @@ export default function DashboardPage() {
             <span className="module-icon" style={{ background: `${m.color}14`, color: m.color }}>{Icons[m.key]}</span>
             <span className="module-body">
               <span className="module-title">{m.title}<span className="tag" style={{ color: m.color, borderColor: m.color }}>{m.tag}</span></span>
-              <span className="module-desc">{m.description}</span>
             </span>
             <span className="module-arrow" aria-hidden="true">→</span>
           </Link>

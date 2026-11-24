@@ -3,7 +3,8 @@ const cors = require('cors');
 const compression = require('compression');
 const jwt = require('jsonwebtoken');
 const { ORDERS } = require('./data');
-const { queryOrders, distinctValues } = require('./query');
+const { queryOrders, distinctValues, invalidateQueryCaches } = require('./query');
+const schedule = require('./schedule');
 
 const PORT = Number(process.env.PORT || 5000);
 const JWT_SECRET = process.env.JWT_SECRET || 'scm-poc-demo-secret-change-me';
@@ -113,6 +114,44 @@ app.get('/api/summary', authenticate, (req, res) => {
     };
   }
   res.json(summaryCache);
+});
+
+// ---------- Schedule (delivery planning on the live orders) ----------
+// Any change to the records clears the derived caches so Grid / Pivot / Chart stay consistent.
+function invalidateDerivedCaches() {
+  invalidateQueryCaches();
+  pivotCache = null;
+  summaryCache = null;
+}
+
+const sendError = (res, e) => res.status(e.status || 500).json({ message: e.message || 'Server error' });
+
+app.get('/api/schedule/resources', authenticate, (req, res) => res.json(schedule.getResources()));
+
+app.get('/api/schedule/events', authenticate, (req, res) => {
+  try {
+    res.json(schedule.queryEvents(req.query));
+  } catch (e) {
+    sendError(res, e);
+  }
+});
+
+app.put('/api/schedule/events/:id', authenticate, (req, res) => {
+  try {
+    const out = schedule.rescheduleOrder(req.params.id, req.body || {}, req.user);
+    invalidateDerivedCaches();
+    res.json(out);
+  } catch (e) {
+    sendError(res, e);
+  }
+});
+
+app.get('/api/schedule/changes', authenticate, (req, res) => res.json(schedule.listChanges()));
+
+app.post('/api/schedule/reset', authenticate, (req, res) => {
+  const out = schedule.resetChanges();
+  if (out.restored) invalidateDerivedCaches();
+  res.json(out);
 });
 
 app.get('/api/health', (req, res) => res.json({ ok: true, records: ORDERS.length }));

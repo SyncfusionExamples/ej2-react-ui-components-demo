@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ColumnDirective, ColumnsDirective, DomVirtualization, Filter, GridComponent, Inject, Sort, VirtualScroll,
-  type ActionEventArgs, type DataStateChangeEventArgs, type QueryCellInfoEventArgs,
+  ColumnDirective, ColumnsDirective, Filter, GridComponent, Inject, Page, Sort, type DataStateChangeEventArgs,
 } from '@syncfusion/ej2-react-grids';
 import PageHeader from '../components/PageHeader';
 import { MODULES } from '../components/modules';
-import { getDistinct, getOrders } from '../services/scmService';
+import { getOrders } from '../services/scmService';
 
 const MODULE = MODULES.find((m) => m.key === 'grid')!;
 const PAGE_SIZE = 100;
@@ -22,33 +21,16 @@ const STATUS_CLASS: Record<string, string> = {
   Delivered: 'ok', Shipped: 'info', 'In Transit': 'info', Processing: 'neutral', Delayed: 'warn', Cancelled: 'bad',
 };
 
-type FilterCol = { field?: string; operator?: string; value?: unknown; predicate?: string; matchCase?: boolean };
-
-/** Grid's active filters on every column except `field`, as a serialised predicate list. */
-function otherColumnFilters(grid: GridComponent | null, field: string) {
-  const cols = ((grid?.filterSettings?.columns ?? []) as FilterCol[]).filter((c) => c.field && c.field !== field);
-  const byField = new Map<string, FilterCol[]>();
-  cols.forEach((c) => byField.set(c.field!, [...(byField.get(c.field!) ?? []), c]));
-  return [...byField.values()].map((group) => ({
-    isComplex: true,
-    condition: group.some((c) => c.predicate === 'or') ? 'or' : 'and',
-    predicates: group.map((c) => ({
-      isComplex: false, field: c.field, operator: c.operator, value: c.value, ignoreCase: !c.matchCase,
-    })),
-  }));
-}
-
 export default function DataGridPage() {
   const gridRef = useRef<GridComponent | null>(null);
   const requestSeq = useRef(0);
   const queryKey = useRef('');
-  const filterColumn = useRef<string>('');
   const [metrics, setMetrics] = useState<Metrics>({ count: 0, clientMs: 0, serverMs: 0, requests: 0, action: 'initial' });
   const [error, setError] = useState('');
-  const [gridHeight, setGridHeight] = useState(() => Math.max(320, window.innerHeight - 300));
+  const [gridHeight, setGridHeight] = useState(() => Math.max(300, window.innerHeight - 300));
 
   useEffect(() => {
-    const onResize = () => setGridHeight(Math.max(320, window.innerHeight - 300));
+    const onResize = () => setGridHeight(Math.max(360, window.innerHeight - 300));
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -88,29 +70,26 @@ export default function DataGridPage() {
     const action = state.action as FilterChoiceAction | undefined;
     const type = action?.requestType;
     if (type === 'filterchoicerequest' || type === 'filterSearchBegin' || type === 'stringfilterrequest') {
-      const field = action?.filterModel?.options?.column?.field || filterColumn.current;
       // The grid re-applies the other columns' filters to the returned list, so send them
       // to the server too: the checkbox list then shows only values that still exist.
-      const where = [...otherColumnFilters(gridRef.current, field), ...((state.where as unknown[]) ?? [])];
-      getDistinct(field, where, state.take || 1000)
-        .then((rows) => state.dataSource?.(rows))
-        .catch(() => state.dataSource?.([]));
+      const infinite = !!(gridRef.current?.filterSettings as { enableInfiniteScrolling?: boolean } | undefined)?.enableInfiniteScrolling;
+      getOrders(state)
+        .then((res) => {
+          if (infinite) {
+            state.dataSource?.({ result: res.result, count: res.count });
+          } else {
+            state.dataSource?.(res.result);
+          }
+        })
+        .catch(() => state.dataSource?.(infinite ? { result: [], count: 0 } : []));
       return;
     }
     loadData(state);
   };
 
-  const onActionBegin = (args: ActionEventArgs) => {
-    const a = args as unknown as { requestType?: string; columnName?: string };
-    if (a.requestType === 'filterBeforeOpen' || a.requestType === 'filterbeforeopen') filterColumn.current = a.columnName ?? '';
-  };
-
-  const onQueryCellInfo = (args: QueryCellInfoEventArgs) => {
-    if (args.column?.field === 'Status' && args.cell) {
-      const v = (args.data as { Status: string }).Status;
-      (args.cell as HTMLElement).innerHTML = `<span class="badge ${STATUS_CLASS[v] ?? 'neutral'}">${v}</span>`;
-    }
-  };
+  const statusTemplate = (props: { Status: string }) => (
+    <span className={`badge ${STATUS_CLASS[props.Status] ?? 'neutral'}`}>{props.Status}</span>
+  );
 
   const clearAll = () => {
     const g = gridRef.current;
@@ -119,12 +98,8 @@ export default function DataGridPage() {
     g.clearSorting();
   };
 
-  const load = (args: any) => {
-    args.enableSeamlessScrolling = true; 
-  }
-
   return (
-    <div className="page">
+    <div className="page grid-page">
       <PageHeader
         module={MODULE}
         actions={<button className="btn-secondary" onClick={clearAll} id="clear-btn">Clear sort &amp; filters</button>}
@@ -144,37 +119,31 @@ export default function DataGridPage() {
           ref={gridRef}
           height={gridHeight}
           rowHeight={36}
-          load={load}
-          enableVirtualization
-          enableDomVirtualization={true}
-          domVirtualizationSettings={{ rowBuffer: 10 }}
-          pageSettings={{ pageSize: PAGE_SIZE }}
-          allowSorting
-          allowMultiSorting
-          allowFiltering
-          filterSettings={{ type: 'Excel' }}
-          enableHover={false}
+          allowPaging={true}
+          pageSettings={{ pageSize: 200 }}
+          allowSorting ={true}
+          allowMultiSorting ={true}
+          allowFiltering ={true}
+          filterSettings={{ type: 'CheckBox',enableInfiniteScrolling: true }}
           dataStateChange={onDataStateChange}
-          actionBegin={onActionBegin}
-          queryCellInfo={onQueryCellInfo}
         >
           <ColumnsDirective>
             <ColumnDirective field="OrderID" headerText="Order ID" isPrimaryKey width={110} textAlign="Right" type="number" />
-            <ColumnDirective field="OrderDate" headerText="Order Date" width={130} type="date" format="dd-MMM-yyyy" />
+            <ColumnDirective field="OrderDate" headerText="Order Date" width={130} type="date" format="dd-MMM-yyyy" filter={{type:'Menu'}} />
             <ColumnDirective field="Supplier" headerText="Supplier" width={170} />
             <ColumnDirective field="Category" headerText="Category" width={150} />
             <ColumnDirective field="Product" headerText="Product" width={150} />
             <ColumnDirective field="Region" headerText="Region" width={140} />
             <ColumnDirective field="Warehouse" headerText="Warehouse" width={150} />
             <ColumnDirective field="Quantity" headerText="Qty" width={100} textAlign="Right" type="number" format="N0" />
-            <ColumnDirective field="UnitPrice" headerText="Unit Price" width={120} textAlign="Right" type="number" format="C2" />
-            <ColumnDirective field="Amount" headerText="Amount" width={140} textAlign="Right" type="number" format="C2" />
-            <ColumnDirective field="Status" headerText="Status" width={130} />
+            <ColumnDirective field="UnitPrice" headerText="Unit Price" width={120} textAlign="Right" type="number" format="C2" filter={{type:'Menu'}} />
+            <ColumnDirective field="Amount" headerText="Amount" width={140} textAlign="Right" type="number" format="C2" filter={{type:'Menu'}} />
+            <ColumnDirective field="Status" headerText="Status" width={130} template={statusTemplate} />
             <ColumnDirective field="ShipMode" headerText="Ship Mode" width={120} />
             <ColumnDirective field="Priority" headerText="Priority" width={110} />
-            <ColumnDirective field="DeliveryDate" headerText="Delivery Date" width={140} type="date" format="dd-MMM-yyyy" />
+            <ColumnDirective field="DeliveryDate" headerText="Delivery Date" width={140} type="date" format="dd-MMM-yyyy" filter={{type:'Menu'}} />
           </ColumnsDirective>
-          <Inject services={[VirtualScroll, Sort, Filter, DomVirtualization]} />
+          <Inject services={[ Sort, Filter, Page]} />
         </GridComponent>
       </div>
     </div>
