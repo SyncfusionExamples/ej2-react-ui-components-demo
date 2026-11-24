@@ -5,7 +5,7 @@ import {
   TreeMapComponent, LevelsDirective, LevelDirective, Inject, TreeMapTooltip, TreeMapLegend, TreeMapHighlight,
 } from '@syncfusion/ej2-react-treemap';
 import { inventory } from '../data/scm';
-import { Card, Expectation, RenderMetric, THEME, fmt, useRenderTimer } from '../components/viz';
+import { Card, RenderMetric, THEME, fmt, useRenderTimer } from '../components/viz';
 
 const BANDS = [
   { from: 0, to: 14, color: '#dc2626', label: 'Stock-out risk (< 15 days)' },
@@ -38,10 +38,6 @@ function TreeMapSample() {
 
   return (
     <>
-      <Expectation>
-        Hierarchical inventory exposure for planners and agent findings: drill down Region → DC → Category, sized by
-        inventory value and coloured by <b>days of supply</b> so stock-out risk and excess stock stand out immediately.
-      </Expectation>
       <Card
         title="Inventory value by network node, coloured by days of supply"
         subtitle={`Total inventory $${(total / 1_000_000).toFixed(1)}M · ${atRisk.length} DC/category groups at stock-out risk (${sum(atRisk)}) · ${excess.length} with excess (${sum(excess)}). Click a header to drill down; use the breadcrumb to go back.`}

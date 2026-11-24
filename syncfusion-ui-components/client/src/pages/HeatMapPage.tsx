@@ -5,7 +5,7 @@ import {
   HeatMapComponent, Inject, Legend, Tooltip, type ICellClickEventArgs, type ITooltipEventArgs,
 } from '@syncfusion/ej2-react-heatmap';
 import { onTimeMatrix } from '../data/scm';
-import { Card, Expectation, RenderMetric, THEME, fmt, useRenderTimer } from '../components/viz';
+import { Card, RenderMetric, THEME, fmt, useRenderTimer } from '../components/viz';
 
 const SIZES = [
   { label: '22 lanes × 26 weeks', lanes: 22, weeks: 26 },
@@ -23,10 +23,6 @@ function HeatMapSample() {
 
   return (
     <>
-      <Expectation>
-        Spot service-level problems across the transport network at a glance: <b>on-time delivery % per lane per week</b>,
-        with a simulated port-congestion window (weeks 10–12). Size selector shows behaviour on larger, realistic matrices.
-      </Expectation>
       <Card
         title="On-time delivery % by lane and week"
         subtitle="Red = below 80 %, amber ≈ 80–90 %, green ≥ 95 %. Click a cell to inspect it; the exact value is also shown in the detail line below and in tooltips."

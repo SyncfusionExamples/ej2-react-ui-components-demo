@@ -8,7 +8,7 @@ import {
 } from '@syncfusion/ej2-react-maps';
 import worldMap from '../data/world-map.json';
 import { lanes, sites, siteById, type Site, type Tier } from '../data/scm';
-import { Card, Expectation, RenderMetric, THEME, fmt, tierColor, useRenderTimer } from '../components/viz';
+import { Card, RenderMetric, THEME, fmt, tierColor, useRenderTimer } from '../components/viz';
 
 type LaneFilter = 'all' | 'inbound' | 'outbound';
 const DISRUPTED_SITE = 'D-RTM';
@@ -51,11 +51,6 @@ function MapsSample() {
 
   return (
     <>
-      <Expectation>
-        <b>Animated geographic views</b> of the supply network: animated freight lanes (direction of flow, thickness = volume),
-        tier-specific site markers, a simulated disruption with a pulsing alert, click a site for its lane volumes, zoom &amp; pan.
-        Base map here is offline GeoJSON; the same layer can use OpenStreetMap / Azure / custom tile URLs (incl. Mapbox raster tiles).
-      </Expectation>
       <Card
         title="Global supply network – flows by lane"
         subtitle="Click a site marker to see its inbound and outbound lanes. Lane width is proportional to quarterly volume."

@@ -6,7 +6,7 @@ import {
   SankeyLinkDirective, Inject, SankeyTooltip, SankeyLegend, type SankeyNodeEventArgs,
 } from '@syncfusion/ej2-react-charts';
 import { channels, flows, sites, siteById } from '../data/scm';
-import { Card, Expectation, RenderMetric, THEME, fmt, tierColor, useRenderTimer } from '../components/viz';
+import { Card, RenderMetric, THEME, fmt, tierColor, useRenderTimer } from '../components/viz';
 
 type Stage = 'all' | 'upstream' | 'downstream';
 
@@ -35,10 +35,6 @@ function SankeySample() {
 
   return (
     <>
-      <Expectation>
-        <b>Business flows</b> through a multi-tier supply chain – Supplier → Plant → Distribution centre → Sales channel –
-        with balanced volumes per stage, hover highlighting and click-through to the node's inbound / outbound mix.
-      </Expectation>
       <Card
         title="End-to-end material flow (thousand units / quarter)"
         subtitle="Hover a node or link to highlight its path; click a node for its flow balance."
