@@ -10,6 +10,10 @@ import DashboardPage from './pages/DashboardPage';
 const DataGridPage = lazy(() => import('./pages/DataGridPage'));
 const PivotPage = lazy(() => import('./pages/PivotPage'));
 const ChartPage = lazy(() => import('./pages/ChartPage'));
+const MapsPage = lazy(() => import('./pages/MapsPage'));
+const TreeMapPage = lazy(() => import('./pages/TreeMapPage'));
+const HeatMapPage = lazy(() => import('./pages/HeatMapPage'));
+const SankeyPage = lazy(() => import('./pages/SankeyPage'));
 const GanttPage = lazy(() => import('./pages/GanttPage'));
 const SchedulePage = lazy(() => import('./pages/SchedulePage'));
 const DiagramPage = lazy(() => import('./pages/DiagramPage'));
@@ -37,6 +41,10 @@ export default function App() {
           <Route path="/grid" element={<DataGridPage />} />
           <Route path="/pivot" element={<PivotPage />} />
           <Route path="/chart" element={<ChartPage />} />
+          <Route path="/maps" element={<MapsPage />} />
+          <Route path="/treemap" element={<TreeMapPage />} />
+          <Route path="/heatmap" element={<HeatMapPage />} />
+          <Route path="/sankey" element={<SankeyPage />} />
           <Route path="/gantt" element={<GanttPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/diagram" element={<DiagramPage />} />
