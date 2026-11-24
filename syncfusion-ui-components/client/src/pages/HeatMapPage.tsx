@@ -29,7 +29,7 @@ function HeatMapSample() {
       </Expectation>
       <Card
         title="On-time delivery % by lane and week"
-        subtitle="Red = below 80 %, amber ≈ 80–90 %, green ≥ 95 %. Click a cell to inspect it."
+        subtitle="Red = below 80 %, amber ≈ 80–90 %, green ≥ 95 %. Click a cell to inspect it; the exact value is also shown in the detail line below and in tooltips."
         right={
           <>
             <label>Matrix

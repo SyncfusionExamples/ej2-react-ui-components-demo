@@ -19,7 +19,8 @@ function TreeMapSample() {
   const [groupBy, setGroupBy] = useState<GroupBy>('region');
   const timer = useRenderTimer();
 
-  // TreeMap processes its dataSource in place, so give it its own copy and compute KPIs from the source rows.
+  // TreeMap mutates its dataSource in place: hand it a fresh copy per groupBy (the dependency is intentional,
+  // paired with key={groupBy} on the component) and compute KPIs from the untouched source rows.
   const rows = useMemo(
     () => inventory.map((r) => ({ ...r, valueText: `$${(r.value / 1_000_000).toFixed(2)}M` })),
     [groupBy],

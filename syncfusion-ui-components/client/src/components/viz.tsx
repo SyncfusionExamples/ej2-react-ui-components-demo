@@ -27,21 +27,21 @@ export function useRenderTimer() {
   return { ms, onLoad, onLoaded };
 }
 
-export function RenderMetric({ ms, label = 'Render time' }: { ms: number | null; label?: string }) {
+export function RenderMetric({ ms, label = 'Component render' }: { ms: number | null; label?: string }) {
   return (
-    <span className="metric" title="Measured in this browser between the component's load and loaded events">
+    <span className="metric" title="Measured in this browser between the component's load and loaded events. Excludes sample-data generation and final browser paint.">
       {label}: <b>{ms == null ? '…' : `${ms.toLocaleString()} ms`}</b>
     </span>
   );
 }
 
 export function Expectation({ children }: { children: ReactNode }) {
-  return <div className="expectation"><strong>Customer expectation → </strong>{children}</div>;
+  return <div className="expectation"><strong>About this sample → </strong>{children}</div>;
 }
 
 export function Card({ title, subtitle, right, children }: { title: string; subtitle?: string; right?: ReactNode; children: ReactNode }) {
   return (
-    <section className="card">
+    <section className="card" aria-label={title}>
       <div className="card-head">
         <div>
           <h2>{title}</h2>

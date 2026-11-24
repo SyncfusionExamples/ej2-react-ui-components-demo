@@ -1,11 +1,15 @@
 import PageHeader from '../components/PageHeader';
 import { MODULES } from '../components/modules';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ChartComponent, SeriesCollectionDirective, SeriesDirective, AxesDirective, AxisDirective,
   Inject, ColumnSeries, LineSeries, SplineSeries, Category, DateTime, Legend, Tooltip,
   Crosshair, Zoom, ScrollBar, StripLine, DataLabel,
+  AccumulationChartComponent, AccumulationDataLabel, AccumulationLegend, AccumulationSeriesCollectionDirective,
+  AccumulationSeriesDirective, AccumulationTooltip, PieSeries,
 } from '@syncfusion/ej2-react-charts';
+import { PageLoader } from '../layout/AppLayout';
+import { getSummary, type Summary } from '../services/scmService';
 import { demand, inventorySeries } from '../data/scm';
 import { Card, Expectation, RenderMetric, THEME, fmt, useRenderTimer } from '../components/viz';
 
@@ -15,12 +19,87 @@ function ChartSample() {
   return (
     <>
       <Expectation>
-        Standard business charts for SCM dashboards and agent results, <em>plus</em> measured performance on
-        realistic, large time-series (point 4 in Marvin's summary: "Performance not established").
+        Standard business charts for SCM dashboards and agent results, <em>plus</em> measured render performance on
+        large, realistic time-series. Order charts use live data from the API; the rest use synthetic SCM data.
       </Expectation>
+      <OrderCharts />
       <DemandChart />
       <LargeDataChart />
     </>
+  );
+}
+
+/** Original backend-driven order charts (monthly value, value by category, orders by status). */
+function OrderCharts() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    getSummary().then(setSummary).catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'));
+  }, []);
+
+  if (error) return <div className="form-error">{error}</div>;
+  if (!summary) return <PageLoader label="Loading chart data…" />;
+
+  const monthly = summary.monthly.map((m) => ({ x: new Date(m.month), y: Math.round(m.amount / 1e6 * 10) / 10 }));
+  const statusData = summary.byStatus.map((s) => ({ x: s.status, y: s.count }));
+  const category = summary.byCategory.map((c) => ({ x: c.category, y: Math.round(c.amount / 1e6) }));
+
+  return (
+    <div className="chart-layout">
+      <div className="card chart-card wide">
+        <ChartComponent
+          id="monthly-chart"
+          theme={THEME}
+          title="Monthly order value (USD millions)"
+          primaryXAxis={{ valueType: 'DateTime', labelFormat: 'MMM yy', intervalType: 'Months', interval: 3, majorGridLines: { width: 0 } }}
+          primaryYAxis={{ labelFormat: '${value}M', lineStyle: { width: 0 } }}
+          tooltip={{ enable: true, shared: true, format: '${point.x}: <b>${point.y}M</b>' }}
+          crosshair={{ enable: true, lineType: 'Vertical' }}
+          chartArea={{ border: { width: 0 } }}
+          height="340px"
+        >
+          <Inject services={[SplineSeries, DateTime, Tooltip, Crosshair, Legend]} />
+          <SeriesCollectionDirective>
+            <SeriesDirective dataSource={monthly} xName="x" yName="y" type="Spline" name="Order value" width={2.5} marker={{ visible: true, width: 6, height: 6 }} />
+          </SeriesCollectionDirective>
+        </ChartComponent>
+      </div>
+
+      <div className="card chart-card">
+        <ChartComponent
+          id="category-chart"
+          theme={THEME}
+          title="Order value by category (USD millions)"
+          primaryXAxis={{ valueType: 'Category', majorGridLines: { width: 0 }, labelIntersectAction: 'Rotate45' }}
+          primaryYAxis={{ labelFormat: '${value}M', lineStyle: { width: 0 } }}
+          tooltip={{ enable: true }}
+          chartArea={{ border: { width: 0 } }}
+          height="340px"
+        >
+          <Inject services={[ColumnSeries, Category, Tooltip]} />
+          <SeriesCollectionDirective>
+            <SeriesDirective dataSource={category} xName="x" yName="y" type="Column" name="Value" cornerRadius={{ topLeft: 4, topRight: 4 }} />
+          </SeriesCollectionDirective>
+        </ChartComponent>
+      </div>
+
+      <div className="card chart-card">
+        <AccumulationChartComponent
+          id="status-chart"
+          theme={THEME}
+          title="Orders by status"
+          legendSettings={{ visible: true, position: 'Bottom' }}
+          tooltip={{ enable: true, format: '${point.x}: <b>${point.y}</b>' }}
+          height="340px"
+        >
+          <Inject services={[PieSeries, AccumulationLegend, AccumulationTooltip, AccumulationDataLabel]} />
+          <AccumulationSeriesCollectionDirective>
+            <AccumulationSeriesDirective dataSource={statusData} xName="x" yName="y" innerRadius="55%" dataLabel={{ visible: true, position: 'Outside', name: 'x' }} />
+          </AccumulationSeriesCollectionDirective>
+        </AccumulationChartComponent>
+      </div>
+    </div>
   );
 }
 
@@ -61,7 +140,12 @@ function DemandChart() {
 function LargeDataChart() {
   const [points, setPoints] = useState(100_000);
   const [canvas, setCanvas] = useState(true);
-  const data = useMemo(() => inventorySeries(points), [points]);
+  // Generation happens on the main thread before the chart renders, so time it separately from the render metric.
+  const { data, genMs } = useMemo(() => {
+    const t0 = performance.now();
+    const d = inventorySeries(points);
+    return { data: d, genMs: Math.round(performance.now() - t0) };
+  }, [points]);
   const timer = useRenderTimer();
 
   return (
@@ -76,6 +160,7 @@ function LargeDataChart() {
             </select>
           </label>
           <label><input type="checkbox" checked={canvas} onChange={(e) => setCanvas(e.target.checked)} /> Canvas rendering</label>
+          <span className="metric" title="Time to generate the sample data (not part of the component render)">Data generation: <b>{fmt(genMs)} ms</b></span>
           <RenderMetric ms={timer.ms} />
         </>
       }
