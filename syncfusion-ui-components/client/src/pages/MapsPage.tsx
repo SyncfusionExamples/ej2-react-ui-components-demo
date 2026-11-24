@@ -40,10 +40,9 @@ function MapsSample() {
   );
 
   const laneStyle = (sourceId: string, targetId: string) => {
-    const isSelected = !selected || sourceId === selected || targetId === selected;
     const disrupted = disruption && (sourceId === DISRUPTED_SITE || targetId === DISRUPTED_SITE);
     const color = disrupted ? '#dc2626' : tierColor[siteById[sourceId].tier];
-    return { color: isSelected ? color : '#cbd5e1', dimmed: !isSelected, disrupted };
+    return { color, dimmed: false, disrupted };
   };
 
   const selectedSite = selected ? siteById[selected] : null;
@@ -54,12 +53,12 @@ function MapsSample() {
     <>
       <Expectation>
         <b>Animated geographic views</b> of the supply network: animated freight lanes (direction of flow, thickness = volume),
-        tier-specific site markers, a simulated disruption with a pulsing alert, click-to-focus on a site, zoom &amp; pan.
+        tier-specific site markers, a simulated disruption with a pulsing alert, click a site for its lane volumes, zoom &amp; pan.
         Base map here is offline GeoJSON; the same layer can use OpenStreetMap / Azure / custom tile URLs (incl. Mapbox raster tiles).
       </Expectation>
       <Card
         title="Global supply network – flows by lane"
-        subtitle="Click a site marker to focus on its lanes. Lane width is proportional to quarterly volume."
+        subtitle="Click a site marker to see its inbound and outbound lanes. Lane width is proportional to quarterly volume."
         right={
           <>
             <label>Lanes
@@ -71,7 +70,7 @@ function MapsSample() {
             </label>
             <label><input type="checkbox" checked={animate} onChange={(e) => setAnimate(e.target.checked)} /> Animate flows</label>
             <label><input type="checkbox" checked={disruption} onChange={(e) => setDisruption(e.target.checked)} /> Simulate Rotterdam port congestion</label>
-            {selected && <button className="btn" onClick={() => setSelected(null)}>Clear focus</button>}
+            {selected && <button className="btn" onClick={() => setSelected(null)}>Clear selection</button>}
             <RenderMetric ms={timer.ms} />
           </>
         }
@@ -84,7 +83,9 @@ function MapsSample() {
         </div>
         <div className={animate ? 'flow-animated' : undefined}>
           <MapsComponent
-            key={`${filter}-${disruption}-${selected}`}
+            // Lane geometry/colour are static props of the directives, so only filter/disruption changes remount the map.
+            // Selecting a site no longer remounts it (keeps zoom/pan and avoids flicker).
+            key={`${filter}-${disruption}`}
             id="scm-map"
             theme={THEME}
             height="620px"
@@ -171,6 +172,9 @@ function MapsSample() {
 }
 
 /**
+ * (Longitude math: a lane whose longitude difference exceeds 180 deg crosses the antimeridian. `span` is the
+ * real east-west distance travelled; `latAtEdge` interpolates latitude linearly at +/-180 deg, and the second
+ * segment restarts from the opposite edge.)
  * Trans-Pacific lanes (e.g. Penang -> Los Angeles) would otherwise be drawn the long way round, across Africa.
  * Split them into two segments that meet at the date line so they follow the real ocean route.
  */
