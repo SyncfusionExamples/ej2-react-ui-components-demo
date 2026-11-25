@@ -126,6 +126,7 @@ export default function DataGridPage() {
           allowFiltering ={true}
           filterSettings={{ type: 'CheckBox',enableInfiniteScrolling: true }}
           dataStateChange={onDataStateChange}
+          clipMode="EllipsisWithTooltip"
         >
           <ColumnsDirective>
             <ColumnDirective field="OrderID" headerText="Order ID" isPrimaryKey width={110} textAlign="Right" type="number" />
