@@ -32,14 +32,14 @@ export interface AppModule {
 }
 
 export const MODULES: AppModule[] = [
-  { key: 'grid', path: '/grid', title: 'Data Grid', tag: '1L records', color: '#2563eb', description: '1,00,000 SCM orders with server-side sorting, filtering and virtual scrolling.' },
-  { key: 'pivot', path: '/pivot', title: 'Pivot Table', tag: 'Analytics', color: '#7c3aed', description: 'Multi-dimensional analysis of the same SCM data by region, category and period.' },
-  { key: 'chart', path: '/chart', title: 'Chart', tag: 'Trends', color: '#0891b2', description: 'Demand vs. forecast and large time-series performance on synthetic SCM data.' },
-  { key: 'maps', path: '/maps', title: 'Maps', tag: 'Geo', color: '#0d9488', description: 'Animated freight lanes, tier markers and disruption alerts on a world map.' },
-  { key: 'treemap', path: '/treemap', title: 'Tree Map', tag: 'Hierarchy', color: '#d97706', description: 'Inventory exposure by region, DC and category with days-of-supply risk bands.' },
-  { key: 'heatmap', path: '/heatmap', title: 'Heat Map', tag: 'Service level', color: '#dc2626', description: 'On-time delivery % by lane and week across the transport network.' },
-  { key: 'sankey', path: '/sankey', title: 'Sankey', tag: 'Flow', color: '#2563eb', description: 'Supplier to plant to DC to channel business flows.' },
-  { key: 'gantt', path: '/gantt', title: 'Gantt', tag: 'Planning', color: '#ea580c', description: 'Warehouse rollout plan with task dependencies and progress.' },
-  { key: 'schedule', path: '/schedule', title: 'Schedule', tag: 'Live planning', color: '#16a34a', description: 'Delivery plan for the same 1L SCM orders by warehouse. Drag an order to reschedule it.' },
-  { key: 'diagram', path: '/diagram', title: 'Diagram', tag: 'Flow', color: '#db2777', description: 'End-to-end supply chain flow from supplier to customer.' },
+  { key: 'grid', path: '/grid', title: 'Data Grid', tag: '1L records', color: '#2563eb' },
+  { key: 'pivot', path: '/pivot', title: 'Pivot Table', tag: 'Analytics', color: '#7c3aed' },
+  { key: 'chart', path: '/chart', title: 'Chart', tag: 'Trends', color: '#0891b2'},
+  { key: 'maps', path: '/maps', title: 'Maps', tag: 'Geo', color: '#0d9488',  },
+  { key: 'treemap', path: '/treemap', title: 'Tree Map', tag: 'Hierarchy', color: '#d97706' },
+  { key: 'heatmap', path: '/heatmap', title: 'Heat Map', tag: 'Service level', color: '#dc2626' },
+  { key: 'sankey', path: '/sankey', title: 'Sankey', tag: 'Flow', color: '#2563eb' },
+  { key: 'gantt', path: '/gantt', title: 'Gantt', tag: 'Planning', color: '#ea580c' },
+  { key: 'schedule', path: '/schedule', title: 'Schedule', tag: 'Live planning', color: '#16a34a' },
+  { key: 'diagram', path: '/diagram', title: 'Diagram', tag: 'Flow', color: '#db2777' },
 ];
