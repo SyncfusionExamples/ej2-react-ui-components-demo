@@ -26,7 +26,6 @@ export interface AppModule {
   key: keyof typeof Icons;
   path: string;
   title: string;
-  description: string;
   tag: string;
   color: string;
 }
