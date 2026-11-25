@@ -31,7 +31,6 @@ export default function AppLayout() {
           <span className="icon">{Icons.menu}</span>
         </button>
         <div className="brand">
-          <span className="brand-mark">S</span>
           <span className="brand-name">SCM Insights</span>
           <span className="brand-sub">Syncfusion React POC</span>
         </div>
